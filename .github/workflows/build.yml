@@ -17,25 +17,34 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Build release binary
-        run: cargo build --release
+      - name: Add wasm target
+        run: rustup target add wasm32-unknown-unknown
 
-      - name: Deploy to Server
+      - name: Install cargo-leptos
+        run: cargo install cargo-leptos
+
+      - name: Build release
+        run: cargo leptos build --release
+
+      - name: Deploy binary + site to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "target/release/leptos-hello"
-          target: "/home/remove/leptos_hello_world/${{ secrets.SERVER_USER }}/leptos-hello"
+          source: |
+            target/release/leptos_hello_world
+            target/site/**
+          target: /home/${{ secrets.SERVER_USER }}/leptos_hello_world_deploy
 
-      - name: Restart service
+      - name: Restart server process
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            pkill leptos-hello || true
-            chmod +x /home/remove/leptos_hello_world/${{ secrets.SERVER_USER }}/leptos-hello
-            nohup /home/remove/leptos_hello_world/${{ secrets.SERVER_USER }}/leptos-hello > server.log 2>&1 &
+            cd ~/leptos_hello_world_deploy
+            pkill leptos_hello_world || true
+            chmod +x ./leptos_hello_world
+            nohup ./leptos_hello_world > server.log 2>&1 &
