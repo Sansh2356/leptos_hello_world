@@ -1,35 +1,41 @@
-name: CI
+name: Build and Deploy Leptos
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Set up Rust
+      - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-          override-file: Cargo.toml
 
-      - name: Build the application
-        run: cargo build --verbose
+      - name: Build release binary
+        run: cargo build --release
 
-      - name: Run tests
-        run: cargo test --verbose
+      - name: Deploy to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "target/release/leptos-hello"
+          target: "/home/${{ secrets.SERVER_USER }}/leptos-hello"
 
-      - name: Deploy
-        run: |
-          echo "Deploying the application..."
-          # Add your deployment commands here, e.g., uploading to a server or cloud service.
+      - name: Restart service
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            pkill leptos-hello || true
+            chmod +x /home/${{ secrets.SERVER_USER }}/leptos-hello
+            nohup /home/${{ secrets.SERVER_USER }}/leptos-hello > server.log 2>&1 &
