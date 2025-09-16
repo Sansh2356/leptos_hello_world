@@ -27,7 +27,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "target/release/leptos-hello"
-          target: "/home/${{ secrets.SERVER_USER }}/leptos-hello"
+          target: "/home/remove/leptos_hello_world/${{ secrets.SERVER_USER }}/leptos-hello"
 
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.0
@@ -37,5 +37,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             pkill leptos-hello || true
-            chmod +x /home/${{ secrets.SERVER_USER }}/leptos-hello
-            nohup /home/${{ secrets.SERVER_USER }}/leptos-hello > server.log 2>&1 &
+            chmod +x /home/remove/leptos_hello_world/${{ secrets.SERVER_USER }}/leptos-hello
+            nohup /home/remove/leptos_hello_world/${{ secrets.SERVER_USER }}/leptos-hello > server.log 2>&1 &
