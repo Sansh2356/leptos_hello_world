@@ -11,7 +11,7 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Stylesheet id="leptos" href="/pkg/yral_hello_world.css"/>
-        <Title text="Hello World"/>
+        <Title text="Hello World sadasdas"/>
         <Router>
             <main>
 
@@ -29,7 +29,7 @@ pub fn App() -> impl IntoView {
 fn HomePage() -> impl IntoView {
 
     view! {
-        <h1>"Hello World"</h1>
+        <h1>"Hello World asdsadasdasd"</h1>
     }
 }
 
